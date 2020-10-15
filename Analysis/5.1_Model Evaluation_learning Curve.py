@@ -12,24 +12,27 @@ from scipy import interp
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import pickle
 
 #sklearn 
-from sklearn.cross_validation import StratifiedKFold
+#from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.cross_validation import train_test_split
+#from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.learning_curve import learning_curve
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import learning_curve
 # Data Downloading
 
-# Data Downloading
 
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Raw Data')
+
+os.chdir('C:\Python Program\Python TCGA\BRCA_Python_Subtype\Raw Data')
 
 with open('PAM50lite.pickle',mode='rb') as f:
     df=pickle.load(f)
@@ -56,9 +59,6 @@ y=le.fit_transform(y1)
 le.classes_
 le.transform(le.classes_) 
     
-X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=1)
-    
- 
  
 # Split Data into Training Data and Test Data
 
@@ -100,6 +100,7 @@ train_std=np.std(train_scores,axis=1)
 test_mean=np.mean(test_scores,axis=1)
 test_std=np.std(test_scores,axis=1)
 
+
 plt.plot(train_size,train_mean,color='blue',marker='o',markersize=5,label='training accuracy')
 
 #信頼区間
@@ -118,5 +119,5 @@ plt.legend(loc='lower right')
 plt.ylim([0.7,0.99])
 os.getcwd()
 
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
+os.chdir('C:\Python Program\Python TCGA\BRCA_Python_Subtype\Analysis')
 plt.savefig('Learning_Curve.png')

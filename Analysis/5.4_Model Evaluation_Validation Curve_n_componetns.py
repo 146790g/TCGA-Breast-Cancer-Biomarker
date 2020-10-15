@@ -27,6 +27,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import validation_curve
+
 # Data Downloading
 
 os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Raw Data')
@@ -38,7 +39,9 @@ with open('PAM50lite.pickle',mode='rb') as f:
 
 # dfに列名を付ける
 
-df2=df.drop(['PAM50','TNBC','PAM50lite'],axis=1)
+df2=df.drop(['PAM50','TNBC','PAM50lite'],axis=1).dropna(how='all',axis=1)
+df2.shape
+df.shape
 
 for i in range(len(df2.columns)-1):
     q=df2[df2.columns[i]].quantile(0.98)
@@ -65,8 +68,8 @@ X=np.log(X+0.001)
 # 6.1.2 パイプラインで変換器と推定器を結合する。
 
 rf=RandomForestClassifier(criterion='entropy',
-                          n_estimators=2,
-                          max_depth=2,
+                          n_estimators=5,
+                          max_depth=4,
                           random_state=0,
                           n_jobs=1)
 
@@ -77,12 +80,12 @@ pipe_rf = Pipeline([('ms',MinMaxScaler()),
                     ('rf',rf)])
     
     
-param_range=[1,2,3,5,7,10]
+param_range=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
     
 train_scores,test_scores=validation_curve(estimator=pipe_rf,
                                                    X=X,
                                                    y=y,
-                                                   param_name='rf__max_depth',
+                                                   param_name='pca__n_components',
                                                    param_range=param_range,
                                                    cv=10)
 
@@ -106,14 +109,14 @@ plt.fill_between(param_range,test_mean+test_std,test_mean-test_std,alpha=0.15,co
 
 
 plt.grid()
-plt.xlabel('max_depth')
+plt.xlabel('n_components')
 plt.ylabel('Accuracy')
 plt.legend(loc='lower right')
 plt.ylim([0.6,1])
 os.getcwd()
 
 os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('Validation_Curve_max_depth.png')
+plt.savefig('Validation_Curve_n_components.png')
 
 
 

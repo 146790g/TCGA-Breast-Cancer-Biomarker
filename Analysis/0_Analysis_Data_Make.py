@@ -24,17 +24,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-os.chdir('C:\Users\maete\TCGA Biomarker\Raw Data')
+os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Raw Data')
 os.getcwd()
 
 
 dat=pd.read_csv('TCGA_BRCA.csv',index_col=0).drop('Row.names',axis=1)
 
+type(dat)
+
 PAM50=dat.dropna(subset=['PAM50'])
 TNBC=dat.dropna(subset=['TNBC'])
 PAM50lite=dat.dropna(subset=['PAM50lite'])
 
-      
+
 # Pickle として出力
 
 with open('PAM50.pickle',mode='wb') as f:

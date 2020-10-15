@@ -15,17 +15,19 @@ import pickle
 import matplotlib.pyplot as plt
 
 #sklearn 
-from sklearn.cross_validation import StratifiedKFold
+#from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.cross_validation import train_test_split
+#from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.learning_curve import validation_curve
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import validation_curve
 
 # Data Downloading
 

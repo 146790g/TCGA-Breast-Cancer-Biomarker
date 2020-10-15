@@ -34,10 +34,9 @@ with open('PAM50lite.pickle',mode='rb') as f:
     df=pickle.load(f)
 
 
-df.head(5)
-df.index
-df.columns
-df.shape
+
+
+
 
 # dfに列名を付ける
 
@@ -55,6 +54,8 @@ for i in range(len(df2.columns)-1):
 
 X=df2.values
 type(X)
+
+gene=df2.columns
 
 y1=df.loc[:,'PAM50lite']
 
@@ -100,26 +101,30 @@ eigen_vecs.shape
 
 eigen_pairs = [(np.abs(eigen_vals[i]),eigen_vecs[:,i]) for i in range(len(eigen_vals))]
                
-type(eigen_pairs)
-len(eigen_pairs)
-
-eigen_pairs[0][1].shape
-
-eigen_pairs[1][1].shape
-eigen_pairs[2][1].shape
-eigen_pairs[3][1].shape
-eigen_pairs[4][1].shape
 
 
 eigen_pairs.sort(key=lambda k: k[0], reverse=True)
 
-w=np.hstack((eigen_pairs[0][1][:,np.newaxis],eigen_pairs[1][1][:,np.newaxis]))
+w=np.hstack((eigen_pairs[0][1][:,np.newaxis],
+             eigen_pairs[1][1][:,np.newaxis],
+             eigen_pairs[2][1][:,np.newaxis],
+             eigen_pairs[3][1][:,np.newaxis],
+             eigen_pairs[4][1][:,np.newaxis]))
 
-w.shape
 
+a=eigen_pairs[4][1]
 
+a.T
 
-print('Projection Matrix W:\n',w)
+type(a)
+a.shape
+a.ndim
+
+a2=eigen_pairs[4][1][:,np.newaxis]
+a2.shape
+a2.ndim
+
+a2.T
 
 # PCA transform
 
@@ -128,36 +133,47 @@ w.shape
 
 X_train_pca = X_train_std.dot(w)
 
-X_train_pca = np.dot(X_train_std,w)
 
-X_train_pca.shape
 
-# plot for PCA transformed Data
-fig = plt.figure(1, figsize=(6, 6))
-# Create an axes instance
-ax = fig.add_subplot(111)
-
-colors=['r','b']
-markers=['s','x']
-subtype=["Basal","Non-Basal"]
-
-fig.set_facecolor('white')
-
-for l,c,m in zip(np.unique(y_train),colors,markers):
-    ax.scatter(X_train_pca[y_train==l,0],
-               X_train_pca[y_train==l,1],
-               alpha=0.5,
-               c=c,label=subtype[l-1],marker=m)
+    # 主成分の相関行列を計算する
+correlation_matrix = np.corrcoef(X_train_pca.transpose())
     
-    ax.set_xlabel('PC 1',fontsize=15)
-    ax.set_ylabel('PC 2',fontsize=15)
-    ax.set_title('PCA Transformed Plot',fontsize=15)
-    ax.legend(loc='lower left',title="subtype")
-    ax.set_facecolor('white')
+correlation_matrix.shape
+    
+    
+        # 主成分の相関行列をヒートマップで描く
+feature_names = ['PCA{0}'.format(i)
+                     for i in range(5)]
 
+sns.heatmap(correlation_matrix, annot=True,
+                xticklabels=feature_names,
+                yticklabels=feature_names)
 
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('PCA Transformed Plot.png')
+# another soluation
+
+pca=PCA(n_components=5)
+X_pca=pca.fit_transform(X) 
+X_pca.shape
+
+AR=df.loc[:,df.columns=='AR'].values
+AR.shape
+
+w=np.concatenate([X_pca,AR],axis=1)
+w.shape
+
+# 主成分の相関行列を計算する
+correlation_matrix = np.corrcoef(w.transpose())
+    
+correlation_matrix.shape
+    
+    
+ # 主成分の相関行列をヒートマップで描く
+feature_names = ['PCA{0}'.format(i)
+                     for i in range(5)]+['AR']
+
+sns.heatmap(correlation_matrix, annot=True,
+                xticklabels=feature_names,
+                yticklabels=feature_names)
 
 
 

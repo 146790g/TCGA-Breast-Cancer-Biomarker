@@ -13,8 +13,17 @@ import os
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 
 #sklearn 
+#from sklearn.cross_validation import StratifiedKFold
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import StandardScaler
@@ -27,14 +36,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import validation_curve
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+from sklearn import datasets
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
+
+
 # Data Downloading
 
 os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Raw Data')
 
 with open('PAM50lite.pickle',mode='rb') as f:
     df=pickle.load(f)
-
-
 
 # dfに列名を付ける
 
@@ -49,6 +63,9 @@ for i in range(len(df2.columns)-1):
 
 
 X=df2.values
+
+X.shape
+
 
 y1=df.loc[:,'PAM50lite']
 
@@ -65,8 +82,8 @@ X=np.log(X+0.001)
 # 6.1.2 パイプラインで変換器と推定器を結合する。
 
 rf=RandomForestClassifier(criterion='entropy',
-                          n_estimators=2,
-                          max_depth=2,
+                          max_depth=4,
+                          n_estimators=5,
                           random_state=0,
                           n_jobs=1)
 
@@ -76,44 +93,30 @@ pipe_rf = Pipeline([('ms',MinMaxScaler()),
                     ('pca',PCA(n_components=2)),
                     ('rf',rf)])
     
-    
-param_range=[1,2,3,5,7,10]
-    
-train_scores,test_scores=validation_curve(estimator=pipe_rf,
-                                                   X=X,
-                                                   y=y,
-                                                   param_name='rf__max_depth',
-                                                   param_range=param_range,
-                                                   cv=10)
-
-# Training Data
-train_mean=np.mean(train_scores,axis=1)
-train_std=np.std(train_scores,axis=1)
-
-#Test Data
-test_mean=np.mean(test_scores,axis=1)
-test_std=np.std(test_scores,axis=1)
-
-plt.plot(param_range,train_mean,color='blue',marker='o',markersize=5,label='training accuracy')
-
-#信頼区間
-plt.fill_between(param_range,train_mean+train_std,train_mean-train_std,alpha=0.15,color='blue')
-
-plt.plot(param_range,test_mean,color='red',marker='s',markersize=5,label='test accuracy')
-
-#信頼区間
-plt.fill_between(param_range,test_mean+test_std,test_mean-test_std,alpha=0.15,color='green')
 
 
-plt.grid()
-plt.xlabel('max_depth')
-plt.ylabel('Accuracy')
-plt.legend(loc='lower right')
-plt.ylim([0.6,1])
-os.getcwd()
+pipe_rf.fit(X,y)
 
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('Validation_Curve_max_depth.png')
+pipe_rf.steps[2][1].feature_importances_
+
+importances=pipe_rf.feature_importances_
+
+pipe_rf.named_steps['rf'].feature_importances_
+pipe_rf.steps[3][1].get_feature_names
+
+
+print(gs.best_estimator_)
+print(gs.best_estimator_.rf__max_depth)
+print(gs.best_score_)
+
+print(gs.best_estimator_.get_params())
+
+
+Predict = gs.predict(X)
+
+gs.best_params_
+gs.best_estimator_
+gs.best_score_
 
 
 

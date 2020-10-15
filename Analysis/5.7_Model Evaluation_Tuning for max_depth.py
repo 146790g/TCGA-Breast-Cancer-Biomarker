@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr  4 11:20:08 2017
+Created on Thu Jan 10 13:04:33 2019
 
 @author: 146790
-
-Ch 5.1.3  Logistic Regression using PCA transformation
-
 """
 
 import numpy as np
@@ -89,72 +86,46 @@ X_train_pca=pca.fit_transform(X_train_std)
 X_test_pca=pca.transform(X_test_std)
 
 
-# Model Fitting
+# Model Fitting and Accuracy for Training Data
 
-rf=RandomForestClassifier(criterion='entropy',
-                          n_estimators=20,
-                          max_depth=5,
+param_range=[1,2,3,5,7,10]
+as1=[]
+
+for max_depth in param_range:
+    rf=RandomForestClassifier(criterion='entropy',
+                          n_estimators=4,
+                          max_depth=max_depth,
                           random_state=0,
                           n_jobs=2)
+    rf.fit(X_train_pca, y_train)
+    as1.append(rf.score(X_train_pca, y_train))
 
-rf = rf.fit(X_train_pca, y_train)
+# Model Fitting and Accuracy for Test Data
+   
+param_range=[1,2,3,5,7,10]
+as2=[]
 
-y_train_pred=rf.predict(X_train_pca)
-y_test_pred=rf.predict(X_test_pca)
-
-from sklearn.metrics import confusion_matrix
-
-#Accuracy Score
-as1=rf.score(X_train_pca, y_train)
-as2=rf.score(X_test_pca, y_test)
-
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-fout=open('accuracy.txt','w')
-fout.writelines('Accuracy with Training Data: %.3f' % as1 + '\n')
-fout.writelines('Acccuracy with Test Data: %.3f' % as2)
-fout.close()
-
+for max_depth in param_range:
+    rf=RandomForestClassifier(criterion='entropy',
+                          n_estimators=4,
+                          max_depth=max_depth,
+                          random_state=0,
+                          n_jobs=2)
+    rf.fit(X_test_pca, y_test)
+    as2.append(rf.score(X_test_pca, y_test))
 
 
-#混合行列 with Training Data
-confmat=confusion_matrix(y_true=y_train,y_pred=y_train_pred)
+plt.plot(param_range,as1,label="accuracy for training data")
+plt.plot(param_range,as2,label="accuracy for test data")
 
-confmat.shape
-type(confmat)
-
-fig, ax = plt.subplots(figsize=(2.5, 2.5))
-ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
-for i in range(confmat.shape[0]):
-    for j in range(confmat.shape[1]):
-        ax.text(x=j, y=i, s=confmat[i, j], va='center', ha='center')
-
-
-
-
-
-plt.xlabel('Predicted Class')
-plt.ylabel('True Class')
-plt.title('Evaluation with Training Data')
-plt.tight_layout()
+plt.grid()
+plt.title("Simgple Tuning for max_depth")
+plt.xlabel("max_depth")
+plt.ylabel("accuracy")
+plt.legend()
+#plt.show()
 
 os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('Evaluation Matrix with Training Data.png')
-
-#混合行列 with Test Data
-confmat=confusion_matrix(y_true=y_test,y_pred=y_test_pred)
-
-fig, ax = plt.subplots(figsize=(2.5, 2.5))
-ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
-for i in range(confmat.shape[0]):
-    for j in range(confmat.shape[1]):
-        ax.text(x=j, y=i, s=confmat[i, j], va='center', ha='center')
-
-plt.xlabel('Predicted Class')
-plt.ylabel('True Class')
-plt.title('Evaluation with Test Data')
-plt.tight_layout()
-
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('Evaluation Matrix with Test Data.png')
+plt.savefig('Simgple Tuning for max_depth.png')
 
 

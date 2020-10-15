@@ -15,17 +15,17 @@ import matplotlib.pyplot as plt
 import pickle
 import os
 #sklearn 
-from sklearn.cross_validation import StratifiedKFold
+#from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.cross_validation import train_test_split
+#from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score,f1_score
 from sklearn.ensemble import RandomForestClassifier
 
 # Data Downloading
@@ -80,10 +80,13 @@ X_test_std=sc.transform(X_test_norm)
 
 pca=PCA(n_components=2)
 
+
 # Training DataをPCA変換する
 
 X_train_pca=pca.fit_transform(X_train_std)
-#射影行列をTest Dataから構成し、それを用いて、Test DataをPCA変換する
+
+
+#射影行列をTrain Dataから構成し、それを用いて、Test DataをPCA変換する
 X_test_pca=pca.transform(X_test_std)
 
 
@@ -111,38 +114,55 @@ classifier=rf
 markers = ('s', 'x')
 colors = ('red', 'blue')
 cmap = ListedColormap(colors[:len(np.unique(y))])
+
 subtype=('Basal','Non-Basal')
 
     # plot the decision surface
-    x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, 0.02),
-                           np.arange(x2_min, x2_max, 0.02))
+x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+
+np.arange(1,100,0.5)
     
-    Z = rf.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
-    Z = Z.reshape(xx1.shape)
-    plt.contourf(xx1, xx2, Z, alpha=0.4, cmap=cmap)
-    plt.xlim(xx1.min(), xx1.max())
-    plt.ylim(xx2.min(), xx2.max())
+xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, 0.02),
+                       np.arange(x2_min, x2_max, 0.02))
+
+xx1.shape
+xx2.shape
+
+np.array([xx1.ravel(), xx2.ravel()]).shape
+np.array([xx1.ravel(), xx2.ravel()]).T.shape
+
+Z = rf.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+Z = Z.reshape(xx1.shape)
+
+
+fig = plt.figure(figsize=(8, 8))
+# Create an axes instance
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+
+ax1.contourf(xx1, xx2, Z, alpha=0.2, cmap=cmap)
+
+ax1.set_xlim(xx1.min(), xx1.max())
+ax1.set_ylim(xx2.min(), xx2.max())
 
     # plot class samples
-    for idx, cl in enumerate(np.unique(y)):
-        plt.scatter(x=X[y == cl, 0], 
-                    y=X[y == cl, 1],
-                    alpha=0.6, 
-                    color=cmap(idx),
-                    edgecolor='black',
-                    marker=markers[idx],
-                    label=subtype[idx])
+for idx, cl in enumerate(np.unique(y)):
+    ax1.scatter(x=X[y == cl, 0],
+                y=X[y == cl, 1],
+                alpha=0.5, 
+                color=cmap(idx),
+                edgecolor='black',
+                marker=markers[idx],
+                label=subtype[idx])
         
-    plt.xlabel('PC 1')
-    plt.ylabel('PC 2')
-    plt.legend(loc='lower left')
-    plt.title('Fitting with Training Data')
+ax1.set_xlabel('PC 1')
+ax1.set_ylabel('PC 2')
+ax1.legend(loc='lower left')
+ax1.set_title('Fitting with Training Data')
 
-os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('PCA & RF Fitting with Training Data.png')
-        
+     
 
 # Plot for Test Data
 
@@ -155,32 +175,37 @@ cmap = ListedColormap(colors[:len(np.unique(y))])
 subtype=('Basal','Non-Basal')
 
     # plot the decision surface
-    x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, 0.02),
+x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, 0.02),
                            np.arange(x2_min, x2_max, 0.02))
+
+xx1.ravel().shape
     
-    Z = rf.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
-    Z = Z.reshape(xx1.shape)
-    plt.contourf(xx1, xx2, Z, alpha=0.4, cmap=cmap)
-    plt.xlim(xx1.min(), xx1.max())
-    plt.ylim(xx2.min(), xx2.max())
+Z = rf.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+Z = Z.reshape(xx1.shape)
+
+ax2.contourf(xx1, xx2, Z, alpha=0.3, cmap=cmap)
+ax2.set_xlim(xx1.min(), xx1.max())
+ax2.set_ylim(xx2.min(), xx2.max())
 
     # plot class samples
-    for idx, cl in enumerate(np.unique(y)):
-        plt.scatter(x=X[y == cl, 0], 
-                    y=X[y == cl, 1],
-                    alpha=0.6, 
-                    color=cmap(idx),
-                    edgecolor='black',
-                    marker=markers[idx],
-                    label=subtype[idx])
+for idx, cl in enumerate(np.unique(y)):
+    ax2.scatter(x=X[y == cl, 0],
+                y=X[y == cl, 1],
+                alpha=0.6, 
+                color=cmap(idx),
+                edgecolor='black',
+                marker=markers[idx],
+                label=subtype[idx])
         
-    plt.xlabel('PC 1')
-    plt.ylabel('PC 2')
-    plt.legend(loc='lower left')
-    plt.title('Fitting with Test Data')
+ax2.set_xlabel('PC 1')
+ax2.set_ylabel('PC 2')
+ax2.legend(loc='lower left')
+ax2.set_title('Fitting with Test Data')
+
+plt.show()
     
 os.chdir('D:\Python TCGA\BRCA_Python_Subtype\Analysis')
-plt.savefig('PCA & LR Fitting with Test Data.png')
+plt.savefig('PCA & LR Fitting with Training&Test Data.png')
         
